@@ -9,14 +9,17 @@ description = "Identity and authentication service for pyfarm ecosystem"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "pyfarm-core>=0.1.0",
+    "pyfarm-core[storage]>=0.1.0",
     "pyfarm-config>=0.1.0",
-    "fastapi>=0.95,<0.96",
+    "fastapi>=0.103,<1.0",
     "uvicorn[standard]>=0.20,<0.21",
-    "pydantic>=2.0,<3.0",
+    "pydantic[email]>=2.0,<3.0",
     "pyjwt>=2.6,<2.7",
     "python-multipart>=0.0.5",
     "passlib[bcrypt]>=1.7,<2.0",
+    # passlib 1.7.x cannot read bcrypt 4.x's version metadata, which breaks
+    # hashing; pin bcrypt to the 3.x series until passlib is updated.
+    "bcrypt>=3.2,<4.0",
 ]
 
 [project.optional-dependencies]
