@@ -2,22 +2,21 @@
 
 from __future__ import annotations
 
-import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import jwt
 from passlib.context import CryptContext
 
+from pyfarm.config import get_settings
+
 from .models import TokenPayload
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# JWT configuration
-SECRET_KEY = os.getenv("AUTH_SECRET_KEY", "dev-secret-key-change-in-production")
+# JWT algorithm
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 hours
 
 
 def hash_password(password: str) -> str:
@@ -41,8 +40,10 @@ def create_access_token(
     Returns:
         Tuple of (token, expiration_datetime)
     """
+    settings = get_settings()
+
     if expires_delta is None:
-        expires_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
 
     now = datetime.now(timezone.utc)
     expires = now + expires_delta
@@ -57,7 +58,7 @@ def create_access_token(
 
     encoded_jwt = jwt.encode(
         payload.model_dump(),
-        SECRET_KEY,
+        settings.auth_secret_key.get_secret_value(),
         algorithm=ALGORITHM,
     )
 
@@ -70,8 +71,13 @@ def decode_access_token(token: str) -> Optional[TokenPayload]:
     Returns:
         TokenPayload if valid, None if invalid or expired.
     """
+    settings = get_settings()
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token,
+            settings.auth_secret_key.get_secret_value(),
+            algorithms=[ALGORITHM],
+        )
         return TokenPayload(**payload)
     except jwt.ExpiredSignatureError:
         return None
