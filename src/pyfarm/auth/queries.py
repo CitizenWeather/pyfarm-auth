@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from pyfarm.storage import StorageBackend
+from pyfarm.core.storage import StorageBackend
 
 from .models import Role, UserCreate, UserResponse
 from .security import hash_password, verify_password

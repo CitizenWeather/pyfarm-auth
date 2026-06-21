@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pyfarm.storage import get_backend
+from pyfarm.core.storage import get_backend
 
 from .models import (
     LoginRequest,
